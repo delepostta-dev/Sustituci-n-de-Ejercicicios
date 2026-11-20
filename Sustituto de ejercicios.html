@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sustituto de ejercicios</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Marca Juanma Solís: negro + amarillo de acento sobre fondo claro. Una sola columna, pensada para el celular en el gimnasio. */
+  --ink:#141414; --bg:#FAFAF7; --card:#FFFFFF; --line:#E4E1D8; --muted:#6B6860; --muted-dark:#B8B4AA;
+  --accent:#EEB625; --accent-soft:#FBF1D3; --chip:#F0EEE8;
+  --ok:#2F6B3A; --warn:#8A5A00;
+  --display:"Poppins",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --body:"Poppins",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme: light;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px}
+
+header{background:var(--ink);color:#fff;padding:20px 16px 28px}
+.wrap{max-width:640px;margin:0 auto;padding:0 16px}
+header .wrap{padding:0}
+.brand{display:flex;align-items:center;gap:10px}
+.brand svg{width:40px;height:40px;flex:none}
+.brand b{display:block;font-weight:600;font-size:15px;line-height:1.1}
+.brand small{display:block;font-size:8.5px;letter-spacing:.38em;color:var(--muted-dark);font-weight:500;margin-top:4px}
+header h1{font-family:var(--display);font-weight:600;font-size:clamp(28px,7vw,40px);line-height:1.08;margin:26px 0 10px;text-wrap:balance;letter-spacing:-.01em}
+header h1 em{font-style:normal;color:var(--accent)}
+header p{margin:0;color:var(--muted-dark);font-size:14px;max-width:46ch}
+
+main{padding:20px 0 40px}
+.step{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px}
+.step-h{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.num{width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--ink);font-weight:600;font-size:12px;display:grid;place-items:center;flex:none}
+.step-h h2{font-size:15px;font-weight:600;margin:0}
+.step-h span.hint{margin-left:auto;font-size:12px;color:var(--muted)}
+
+.search{position:relative}
+.search input{width:100%;font:inherit;font-size:16px;padding:13px 44px 13px 14px;border:1.5px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink)}
+.search input:focus{border-color:var(--ink);outline:none}
+.search .clear{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:34px;height:34px;border:0;background:transparent;border-radius:8px;cursor:pointer;color:var(--muted);font-size:18px}
+.sugg{list-style:none;margin:6px 0 0;padding:4px;border:1px solid var(--line);border-radius:12px;background:var(--card);max-height:260px;overflow:auto}
+.sugg[hidden]{display:none}
+.sugg button{width:100%;text-align:left;border:0;background:transparent;padding:10px 10px;border-radius:8px;cursor:pointer;display:flex;justify-content:space-between;gap:10px;align-items:center}
+.sugg button:hover,.sugg button[aria-selected="true"]{background:var(--chip)}
+.sugg small{color:var(--muted);font-size:11.5px;white-space:nowrap}
+.picked{display:flex;align-items:center;gap:10px;margin-top:10px;padding:10px 12px;background:var(--accent-soft);border-radius:12px}
+.picked b{font-weight:600}
+.picked small{display:block;color:var(--muted);font-size:12px}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1.5px solid var(--line);background:var(--card);border-radius:999px;padding:9px 14px;cursor:pointer;font-size:13.5px;font-weight:500;min-height:42px;display:inline-flex;align-items:center;gap:6px}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.chip[aria-pressed="true"] .dot{background:var(--accent)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--line)}
+.linkbtn{border:0;background:none;color:var(--muted);font-size:12.5px;text-decoration:underline;cursor:pointer;padding:6px 0 0}
+
+.results-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:22px 0 10px}
+.results-h h2{font-size:19px;font-weight:600;margin:0;text-wrap:balance}
+.results-h span{font-size:12.5px;color:var(--muted);white-space:nowrap}
+.notice{font-size:13px;background:var(--accent-soft);border-radius:12px;padding:10px 12px;margin-bottom:10px}
+.res{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.item{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;display:grid;grid-template-columns:34px 1fr;gap:4px 12px}
+.item.best{border:2px solid var(--ink)}
+.rank{grid-row:span 3;width:34px;height:34px;border-radius:10px;background:var(--chip);display:grid;place-items:center;font-weight:600;font-size:14px;font-variant-numeric:tabular-nums}
+.best .rank{background:var(--accent)}
+.item h3{margin:0;font-size:15.5px;font-weight:600;line-height:1.3}
+.meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.tag{font-size:11px;font-weight:500;padding:3px 8px;border-radius:6px;background:var(--chip);color:var(--ink)}
+.tag.same{background:#E3EFE5;color:var(--ok)}
+.tag.far{background:#F6EAD6;color:var(--warn)}
+.tag.top{background:var(--ink);color:#fff}
+.item p{margin:2px 0 0;font-size:13px;color:var(--muted)}
+.vid{grid-column:2;justify-self:start;margin-top:8px;display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:#fff;text-decoration:none;border-radius:999px;padding:8px 14px 8px 10px;font-size:12.5px;font-weight:600;min-height:38px}
+.vid svg{width:16px;height:16px}
+.vid.ext{background:var(--card);color:var(--ink);border:1.5px solid var(--ink)}
+.novid{grid-column:2;font-size:11.5px;color:var(--muted);margin-top:6px}
+.empty{background:var(--card);border:1px dashed var(--line);border-radius:16px;padding:18px;text-align:center;color:var(--muted);font-size:14px}
+
+.rules{background:var(--ink);color:#fff;border-radius:16px;padding:18px 16px;margin-top:22px}
+.rules h2{font-size:16px;font-weight:600;margin:0 0 12px}
+.rules ol{margin:0;padding:0;list-style:none;display:grid;gap:10px;counter-reset:r}
+.rules li{display:grid;grid-template-columns:26px 1fr;gap:10px;font-size:13.5px;color:#E9E6DE}
+.rules li::before{counter-increment:r;content:counter(r);width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--ink);font-weight:600;font-size:12px;display:grid;place-items:center}
+.rules li b{color:#fff;font-weight:600}
+
+.cta{background:var(--accent);border-radius:16px;padding:20px 16px;margin-top:12px}
+.cta h2{margin:0 0 6px;font-size:18px;font-weight:600;text-wrap:balance}
+.cta p{margin:0 0 14px;font-size:14px}
+.cta a{display:inline-flex;align-items:center;justify-content:center;background:var(--ink);color:#fff;text-decoration:none;font-weight:600;border-radius:999px;padding:12px 20px;min-height:46px}
+.cta small{display:block;margin-top:10px;font-size:12.5px}
+footer{color:var(--muted);font-size:11.5px;text-align:center;padding:8px 0 28px}
+@media (prefers-reduced-motion:no-preference){.item{animation:in .18s ease-out both}@keyframes in{from{transform:translateY(4px)}to{transform:none}}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="brand">
+      <svg viewBox="0 0 100 100" aria-hidden="true"><path d="M6 50H31M69 50H94" stroke="#fff" stroke-width="4" stroke-linecap="round"/><rect x="12" y="31" width="8" height="38" rx="3" fill="#fff"/><rect x="22" y="37" width="5" height="26" rx="2" fill="#fff"/><rect x="80" y="31" width="8" height="38" rx="3" fill="#fff"/><rect x="73" y="37" width="5" height="26" rx="2" fill="#fff"/><polyline points="31,50 39,50 44,35 51,65 56,42 60,50 69,50" fill="none" stroke="#EEB625" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div><b>Juanma Solís</b><small>COACHING ONLINE</small></div>
+    </div>
+    <h1>¿La máquina está ocupada? <em>Encontrá tu reemplazo.</em></h1>
+    <p>Elegí el ejercicio que no podés hacer y te muestro las mejores alternativas con lo que tengas a mano, de mejor a peor reemplazo.</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="step" aria-labelledby="s1">
+    <div class="step-h"><span class="num">1</span><h2 id="s1">¿Qué ejercicio no podés hacer?</h2></div>
+    <div class="search">
+      <label for="q" class="sr" style="position:absolute;left:-9999px">Buscar ejercicio</label>
+      <input id="q" type="search" autocomplete="off" placeholder="Ej.: prensa, jalón, press banca…" aria-controls="sugg" aria-autocomplete="list">
+      <button class="clear" id="clear" type="button" aria-label="Borrar búsqueda">×</button>
+    </div>
+    <ul class="sugg" id="sugg" role="listbox" hidden></ul>
+    <div class="picked" id="picked"></div>
+  </section>
+
+  <section class="step" aria-labelledby="s2">
+    <div class="step-h"><span class="num">2</span><h2 id="s2">¿Por qué lo cambiás?</h2></div>
+    <div class="chips" id="reasons" role="group" aria-labelledby="s2"></div>
+  </section>
+
+  <section class="step" aria-labelledby="s3">
+    <div class="step-h"><span class="num">3</span><h2 id="s3">¿Qué tenés disponible?</h2><span class="hint" id="eqcount"></span></div>
+    <div class="chips" id="equip" role="group" aria-labelledby="s3"></div>
+    <button class="linkbtn" id="allEq" type="button">Marcar todo</button>
+  </section>
+
+  <section aria-live="polite">
+    <div class="results-h"><h2 id="rtitle">Tus alternativas</h2><span id="rcount"></span></div>
+    <div id="notice"></div>
+    <ol class="res" id="res"></ol>
+  </section>
+
+  <section class="rules" aria-labelledby="rr">
+    <h2 id="rr">Cómo hacer bien el cambio</h2>
+    <ol>
+      <li><span><b>Mismas series, reps y RIR</b> que el ejercicio original. Cambia la herramienta, no el objetivo.</span></li>
+      <li><span><b>Hacé una serie de prueba</b> para encontrar la carga. Otro ejercicio, otro peso: no copies los kilos.</span></li>
+      <li><span><b>Anotá el cambio</b> en tu registro, así no comparás números de ejercicios distintos.</span></li>
+      <li><span><b>Es un plan B.</b> En la próxima sesión volvé al ejercicio original de tu rutina.</span></li>
+    </ol>
+  </section>
+
+  <section class="cta" aria-labelledby="cta">
+    <h2 id="cta">¿Querés un plan armado para tu gimnasio?</h2>
+    <p>Diseño tu entrenamiento con lo que realmente tenés disponible, adaptado a tu tiempo y a tu vida.</p>
+    <a href="https://wa.me/message/2Q52S7TE3VSGA1" target="_blank" rel="noopener">Escribime por WhatsApp</a>
+    <small>o mandame «PROGRAMA» por Instagram</small>
+  </section>
+</main>
+<footer>Juanma Solís · Entrenamiento híbrido para vidas reales</footer>
+
+<script>
+const EQ = {bar:"Barra", db:"Mancuernas", mac:"Máquinas", pol:"Polea", smi:"Smith", ban:"Banda", pc:"Peso corporal"};
+const REASONS = [
+  {id:"busy", label:"Está ocupado"},
+  {id:"noeq", label:"No tengo el material"},
+  {id:"pain", label:"Me genera molestia"},
+];
+// Patrones. Cada ejercicio: [nombre, equipos, videoID, subgrupo, estabilidad 1-3 (3 = más amigable con las articulaciones), consejo]
+const P = [
+ {id:"leg-push", name:"Empuje de piernas", mus:"Cuádriceps · Glúteos", subs:{a:"Bilateral", b:"A una pierna"}, ex:[
+  ["Prensa de piernas","mac","ycj5BP48dAw","a",3,"Muy estable: ideal para cargar sin depender de la técnica."],
+  ["Sentadilla péndulo","mac","yeFwyvmeo18","a",3,"Recorrido guiado y profundo, con la espalda apoyada."],
+  ["Sentadilla hack","mac","","a",3,"Espalda apoyada todo el recorrido; muy parecida a la prensa."],
+  ["Sentadilla en Smith","smi","","a",2,"Pies un poco adelantados para cargar más el cuádriceps."],
+  ["Sentadilla con barra","bar","","a",1,"La más exigente en técnica: usala si ya la dominás."],
+  ["Sentadilla frontal","bar","","a",1,"Torso más vertical, más cuádriceps. Exige movilidad."],
+  ["Sentadilla goblet","db","","a",2,"Con una mancuerna: buena opción si hay poco material."],
+  ["Sentadilla sumo en steps","db","gajI_ZiYAOw","a",2,"Postura abierta: suma más glúteo y aductores."],
+  ["Sentadilla búlgara","db","zcN_kFd-2hE","b",2,"Mucho estímulo con poco peso. Empezá con la pierna más débil."],
+  ["Sentadilla búlgara en Smith","smi","mY3nC8UcI34","b",2,"Igual que la búlgara, con más estabilidad."],
+  ["Zancadas con mancuernas","db","vyT8NiscS7Y","b",2,"Pasos largos y controlados, rodilla de atrás casi al piso."],
+  ["Step-up con barra","bar,db","rJ1KqLL2XcM","b",2,"Empujá con la pierna de arriba, sin impulso de la de abajo."],
+  ["Step-down","pc","kfd4tZTrHZU","b",3,"Sin carga y muy controlado: buena opción si algo molesta."],
+ ]},
+ {id:"knee-ext", name:"Extensión de rodilla", mus:"Cuádriceps (aislamiento)", subs:{a:"Aislamiento",b:"Alternativa"}, ex:[
+  ["Extensión de cuádriceps","mac","6CDqGk6ykfU","a",3,"Bajá lento y sin golpear arriba."],
+  ["Extensión de rodilla con banda","ban","","a",3,"Banda atada atrás, sentado: buscá tensión arriba."],
+  ["Sentadilla sissy","pc","","a",1,"Exigente para la rodilla: solo si no hay molestias."],
+  ["Step-down","pc","kfd4tZTrHZU","b",3,"Trabaja cuádriceps con control total."],
+  ["Sentadilla péndulo","mac","yeFwyvmeo18","b",3,"Si no hay aislamiento, un multiarticular de cuádriceps."],
+  ["Prensa de piernas","mac","ycj5BP48dAw","b",3,"Pies bajos en la plataforma para cargar más el cuádriceps."],
+ ]},
+ {id:"hinge", name:"Bisagra de cadera", mus:"Isquiotibiales · Glúteos · Espalda baja", subs:{a:"Peso muerto",b:"Alternativa"}, ex:[
+  ["Peso muerto rumano con barra","bar","ierY13-tWvs","a",2,"Cadera atrás, barra pegada a las piernas."],
+  ["Peso muerto rumano con mancuernas","db","PIL7shnaqdI","a",2,"El reemplazo más directo del rumano con barra."],
+  ["Peso muerto rumano en Smith","smi","","a",2,"Más estable: buena opción para aprender el patrón."],
+  ["Peso muerto rumano a una pierna","db","","a",2,"Menos carga y mucho estímulo. Apoyate en algo si hace falta."],
+  ["Peso muerto convencional","bar","","a",1,"Más carga y más exigencia técnica."],
+  ["Buen día con barra","bar","","a",1,"Arrancá liviano: exige mucho a la espalda baja."],
+  ["Pull-through en polea","pol","","b",3,"Muy amigable con la espalda: la polea marca el recorrido."],
+  ["Peso muerto rumano con banda","ban","","b",3,"Para entrenar en casa o con poco material."],
+  ["Extensiones lumbares","mac,pc","DaXvUzLgO8o","b",3,"Redondeá apenas la espalda alta para cargar glúteo e isquios."],
+ ]},
+ {id:"glute", name:"Extensión de cadera (glúteo)", mus:"Glúteos", subs:{a:"Hip thrust",b:"Alternativa"}, ex:[
+  ["Hip thrust con barra","bar","uSWzHS1Ka1s","a",2,"Pausa de 1 s arriba, mentón adentro."],
+  ["Hip thrust en máquina","mac","eT4YBgr3x6I","a",3,"Más cómodo de preparar y muy estable."],
+  ["Hip thrust en Smith","smi","","a",3,"La barra guiada evita acomodar discos y banco."],
+  ["Hip thrust a una pierna","pc,db","","a",2,"Mucho estímulo sin carga externa."],
+  ["Puente de glúteos","pc,ban,db","","a",3,"Desde el piso: sumá banda o mancuerna para hacerlo más difícil."],
+  ["Patada de glúteo en polea","pol","","b",3,"Extendé la cadera sin arquear la espalda."],
+ ]},
+ {id:"leg-curl", name:"Curl femoral", mus:"Isquiotibiales (aislamiento)", subs:{a:"Curl",b:"Alternativa"}, ex:[
+  ["Curl femoral acostado","mac","KQNA8Hd8bbc","a",3,"Cadera pegada al banco, sin impulso."],
+  ["Curl femoral sentado","mac","9S0OjigBqiQ","a",3,"Más estiramiento del isquio: muy buena opción."],
+  ["Curl femoral de pie en máquina","mac","","a",3,"A una pierna: mismo trabajo, de a un lado."],
+  ["Curl femoral en polea","pol","","a",3,"Con tobillera, de pie o acostado."],
+  ["Curl femoral con banda","ban","","a",3,"Acostado boca abajo, banda en los tobillos."],
+  ["Curl femoral con mancuerna","db","","a",2,"Mancuerna entre los pies, acostado en el banco."],
+  ["Curl nórdico (asistido)","pc","","a",1,"Muy exigente: bajá lento y ayudate con las manos."],
+  ["Peso muerto rumano con mancuernas","db","PIL7shnaqdI","b",2,"Si no hay curl, una bisagra también trabaja el isquio."],
+ ]},
+ {id:"adductor", name:"Aductores", mus:"Aductores", subs:{a:"Aislamiento",b:"Alternativa"}, ex:[
+  ["Aductores en máquina","mac","huxczroGsv8","a",3,"Cerrá con control y abrí lento."],
+  ["Aducción en polea","pol","","a",3,"Tobillera en la pierna de adentro, de pie."],
+  ["Aducción con banda","ban","","a",3,"Banda atada al costado, igual que en polea."],
+  ["Plancha Copenhague","pc","","a",1,"Empezá con la rodilla apoyada en el banco."],
+  ["Sentadilla sumo en steps","db","gajI_ZiYAOw","b",2,"Postura abierta: trabaja aductores con carga."],
+ ]},
+ {id:"calf", name:"Gemelos", mus:"Pantorrillas", subs:{a:"De pie (rodilla estirada)",b:"Sentado (sóleo)"}, ex:[
+  ["Gemelos de pie en Smith","smi","NWlDcTJOu6E","a",3,"Pausa abajo estirando, subí lo más alto posible."],
+  ["Gemelos de pie en máquina","mac","","a",3,"Mismo movimiento con hombreras."],
+  ["Gemelos en prensa","mac","","a",3,"Puntas de pie en el borde de la plataforma."],
+  ["Gemelos a una pierna con mancuerna","db,pc","","a",3,"En un escalón, agarrado a algo para equilibrarte."],
+  ["Gemelos sentado","mac","lnYnDk6zxvI","b",3,"Rodilla doblada: trabaja más el sóleo."],
+  ["Gemelos sentado con mancuernas","db","","b",3,"Mancuernas sobre las rodillas, puntas en un disco."],
+ ]},
+ {id:"h-push", name:"Empuje horizontal", mus:"Pecho · Hombros · Tríceps", subs:{a:"Press",b:"Aperturas"}, ex:[
+  ["Press de pecho en máquina","mac","8aL2LZdgTkQ","a",3,"El más estable: fácil de progresar sin ayudante."],
+  ["Press banca con mancuernas","db","lmMDX6HPNWw","a",2,"Más recorrido que la barra. Codos a unos 45°."],
+  ["Press banca con barra","bar","","a",2,"Escápulas atrás y juntas, sin rebotar en el pecho."],
+  ["Press banca en Smith","smi","","a",3,"Guiado: buena opción si entrenás sin ayudante."],
+  ["Press inclinado con mancuernas","db","LhzyWjt2mzo","a",2,"Más pecho alto y hombro. Banco a 30°."],
+  ["Press inclinado con barra","bar","","a",2,"Banco a 30°, bajá a la parte alta del pecho."],
+  ["Press de pecho con banda","ban","","a",3,"Banda en la espalda: para casa o en viaje."],
+  ["Fondos en máquina","mac","kKkyU2TbbS4","a",2,"Más pecho bajo y tríceps."],
+  ["Flexiones de brazos","pc","i1cDL_wgue0","a",2,"Sumá reps o pausa abajo para hacerlas más difíciles."],
+  ["Flexiones inclinadas en banco","pc","T_OW2ySuKaI","a",3,"Más fáciles: manos en el banco."],
+  ["Flexiones con rodillas apoyadas","pc","e0_m9fpIhH8","a",3,"Para cuando todavía no salen las flexiones completas."],
+  ["Aperturas en máquina (peck deck)","mac","LPTxpqd_098","b",3,"Aislamiento: menos carga, mismo músculo."],
+  ["Cruce de poleas","pol","","b",3,"Tensión constante en todo el recorrido."],
+  ["Aperturas con mancuernas","db","","b",2,"Codos apenas flexionados, sin bajar de más."],
+ ]},
+ {id:"v-push", name:"Empuje vertical", mus:"Hombros · Tríceps", subs:{a:"Press",b:"Alternativa"}, ex:[
+  ["Press de hombros en máquina","mac","PbDvb4eKQYk","a",3,"El más estable para cargar."],
+  ["Press militar con mancuernas sentado","db","","a",2,"Espalda apoyada, sin arquear la zona lumbar."],
+  ["Press militar con barra de pie","bar","Jjc_6z6HBjY","a",1,"Exige estabilidad de tronco: glúteos y abdomen firmes."],
+  ["Press militar en Smith sentado","smi","","a",3,"Guiado y con respaldo."],
+  ["Press landmine","bar","","a",3,"Empuje en diagonal: muy amigable con el hombro."],
+  ["Press de hombros con banda","ban","","a",3,"Parado sobre la banda; ideal en casa."],
+  ["Flexiones pica (pike push-ups)","pc","","a",2,"Cadera alta, cabeza hacia el piso entre las manos."],
+  ["Press inclinado con mancuernas","db","LhzyWjt2mzo","b",2,"Si el hombro molesta arriba, un ángulo más bajo."],
+ ]},
+ {id:"lat-raise", name:"Elevaciones laterales", mus:"Deltoides lateral", subs:{a:"Laterales",b:"Alternativa"}, ex:[
+  ["Elevaciones laterales con mancuernas","db","_3gkd2nmnnk","a",3,"Hasta la altura del hombro, sin impulso."],
+  ["Elevaciones laterales en polea","pol","","a",3,"Tensión constante; podés hacerlas a un brazo."],
+  ["Elevaciones laterales en máquina","mac","","a",3,"Muy estable: el codo empuja la almohadilla."],
+  ["Elevaciones laterales con banda","ban","","a",3,"Parado sobre la banda; ideal en casa."],
+  ["Press de hombros en máquina","mac","PbDvb4eKQYk","b",3,"Si no hay laterales, un press también trabaja el deltoides."],
+ ]},
+ {id:"rear-delt", name:"Deltoides posterior", mus:"Deltoides posterior · Espalda alta", subs:{a:"Aislamiento",b:"Alternativa"}, ex:[
+  ["Deltoides posterior en polea","pol","zr8v9Y-Sm-0","a",3,"Abrí los brazos hacia atrás sin encoger los hombros."],
+  ["Pájaros en máquina (peck deck inverso)","mac","","a",3,"Pecho apoyado, brazos casi estirados."],
+  ["Pájaros con mancuernas","db","","a",2,"Torso inclinado o con el pecho apoyado en un banco."],
+  ["Face pull en polea","pol","","a",3,"Cuerda a la cara, separando las manos."],
+  ["Separación con banda (pull-apart)","ban","","a",3,"Brazos estirados, abrí la banda hasta el pecho."],
+  ["Y-W-T para hombros","pc,db","sI97dGsmpqU","b",3,"Sin peso o muy liviano, control total."],
+ ]},
+ {id:"v-pull", name:"Tracción vertical", mus:"Espalda · Bíceps", subs:{a:"Dominadas / jalón",b:"Alternativa"}, ex:[
+  ["Jalón al pecho","mac,pol","bPGEUrGMOUI","a",3,"El reemplazo más directo de las dominadas."],
+  ["Dominadas","pc","JBmCirXWp8Y","a",2,"Pecho a la barra, bajada completa."],
+  ["Dominadas asistidas","mac,ban","D_3CCf_i9TM","a",3,"Con máquina o banda: anotá la asistencia (menos es mejor)."],
+  ["Dominadas negativas (prono)","pc","9t_3gyqWjbI","a",2,"Bajá en 3 a 5 segundos."],
+  ["Dominadas negativas (supino)","pc","7G3Qd_0hzic","a",2,"Palmas hacia vos; bajá en 3 a 5 segundos."],
+  ["Jalón en máquina a una mano","mac","Y_M86lGdrYI","a",3,"De a un lado: codo hacia la cadera."],
+  ["Jalón con banda arrodillado","ban","","a",3,"Banda anclada arriba: tirá con los codos hacia abajo."],
+  ["Pullover en polea alta","pol","","b",3,"Brazos casi rectos: trabaja dorsales sin bíceps."],
+ ]},
+ {id:"h-pull", name:"Tracción horizontal", mus:"Espalda · Bíceps", subs:{a:"Remo",b:"Alternativa"}, ex:[
+  ["Remo sentado en máquina (agarre neutro)","mac","T-LRkvIlKr8","a",3,"Pecho apoyado: la espalda trabaja, la zona lumbar descansa."],
+  ["Remo en máquina agarre prono","mac","dG63P83YGb4","a",3,"Codos abiertos: más espalda alta."],
+  ["Remo en polea baja","pol","QQlCpC9hv1I","a",3,"Torso quieto, agarre al abdomen."],
+  ["Remo en polea agarre prono","pol","yIlLbpxqn8w","a",3,"Codos abiertos, sin balancear el torso."],
+  ["Remo con mancuernas en banco (seal row)","db","bJKSIN5iP-U","a",3,"Pecho apoyado: muy parecido al remo en máquina."],
+  ["Remo con mancuerna a una mano","db","Xdd0qwhf37A","a",2,"Apoyo en el banco, codo hacia la cadera."],
+  ["Remo en T","bar,mac","cnMhKPwckFs","a",2,"Torso firme, agarre al pecho bajo."],
+  ["Remo con barra","bar","ER0iVtmuStY","a",1,"Exige espalda baja: arrancá liviano."],
+  ["Remo invertido","pc,smi","","a",3,"Bajo la barra del Smith: más fácil cuanto más vertical."],
+  ["Remo con banda","ban","","a",3,"Banda anclada al frente, codos atrás."],
+ ]},
+ {id:"biceps", name:"Bíceps", mus:"Bíceps", subs:{a:"Curl",b:"Alternativa"}, ex:[
+  ["Curl de bíceps en banco inclinado","db","KL1TvIwjs4w","a",3,"Brazos por detrás del cuerpo: más estiramiento."],
+  ["Curl bayesiano en polea","pol","_pZO5UFhAlg","a",3,"De espaldas a la polea, codo atrás."],
+  ["Curl de bíceps con mancuernas","db","","a",3,"Codos pegados, bajada en 2 segundos."],
+  ["Curl de bíceps con barra","bar","","a",2,"Sin echar el torso hacia atrás."],
+  ["Curl martillo","db","","a",3,"Palmas enfrentadas: suma braquial y antebrazo."],
+  ["Curl en banco Scott","bar,db,mac","","a",3,"Brazo apoyado: imposible hacer trampa."],
+  ["Curl en polea","pol","","a",3,"Tensión constante en todo el recorrido."],
+  ["Curl con banda","ban","","a",3,"Parado sobre la banda; ideal en casa."],
+ ]},
+ {id:"triceps", name:"Tríceps", mus:"Tríceps", subs:{a:"Extensión",b:"Alternativa"}, ex:[
+  ["Tríceps en polea alta (barra)","pol","yZqLQhAEX6U","a",3,"Codos pegados al cuerpo."],
+  ["Extensión de tríceps en polea a una mano","pol","4kDvrkKUeFM","a",3,"De a un brazo, buscando la extensión completa."],
+  ["Extensión de tríceps sobre la cabeza en polea","pol","","a",3,"Más estiramiento: gran estímulo para la cabeza larga."],
+  ["Press francés con mancuernas","db","BXmtMPljFXE","a",2,"Solo se mueven los antebrazos."],
+  ["Press francés con barra Z","bar","","a",2,"Bajá hacia la frente, codos quietos."],
+  ["Extensión de tríceps con banda","ban","","a",3,"Banda anclada arriba, como en polea."],
+  ["Fondos de tríceps en banco","pc","","a",1,"Exigente para el hombro: no bajes de 90°."],
+  ["Flexiones cerradas","pc","","b",2,"Manos juntas, codos pegados al cuerpo."],
+  ["Fondos en máquina","mac","kKkyU2TbbS4","b",2,"Torso vertical para cargar más tríceps."],
+ ]},
+ {id:"core", name:"Core", mus:"Abdomen · Estabilidad", subs:{a:"Flexión / anti-extensión",b:"Anti-rotación"}, ex:[
+  ["Crunch en polea","pol","QpSKkkLJ6Gk","a",3,"Enrollá el torso, sin tirar con los brazos."],
+  ["Crunch abdominal en máquina","mac","","a",3,"Movimiento corto, exhalando al contraer."],
+  ["Dead bug","pc","eloBOpnw7YI","a",3,"Zona lumbar pegada al piso, lento."],
+  ["Plancha frontal","pc","","a",3,"Glúteos apretados, cuerpo en línea."],
+  ["Rueda abdominal","pc","","a",1,"Avanzá solo hasta donde no se arquee la espalda."],
+  ["Elevación de piernas colgado","pc","","a",2,"Sin balanceo, bajada controlada."],
+  ["Bear en cuadrupedia","pc","V04GyCoqoMs","a",3,"Rodillas apenas despegadas, espalda quieta."],
+  ["Pallof press con banda","ban","b6Zh5ThlvKg","b",3,"Que el torso no gire."],
+  ["Pallof press semiarrodillado","ban,pol","XmKavt3pK6Q","b",3,"Una rodilla al piso, glúteo apretado."],
+  ["Plancha lateral","pc","TVsLXjoyTzw","b",3,"Cadera alta; anotá los segundos."],
+ ]},
+];
+// Videos de referencia de otros canales para los ejercicios que todavía no tienen video propio
+const EXT = {"Aducción con banda": "krPi_wF4Hq8", "Aducción en polea": "by49bb6ZRv8", "Aperturas con mancuernas": "-4U8vckpVAU", "Buen día con barra": "wCcLJKELjZ0", "Cruce de poleas": "B_5amA7vPbA", "Crunch abdominal en máquina": "l98-SYsMO0s", "Curl con banda": "LlotsrI44D8", "Curl de bíceps con barra": "l-BPupny6cM", "Curl de bíceps con mancuernas": "Q9FDIWJmEAM", "Curl en banco Scott": "_jXG5eTPbLM", "Curl en polea": "vDnOrc_bZKM", "Curl femoral con banda": "_aq_WK_wRWo", "Curl femoral con mancuerna": "8JE5_cD5bJ8", "Curl femoral de pie en máquina": "W9MmYu0b3Qw", "Curl femoral en polea": "b0T-P_mQ8-c", "Curl martillo": "XhM67ihE3ks", "Curl nórdico (asistido)": "QZdcn8POwbw", "Elevaciones laterales con banda": "FU7cH2XeYVg", "Elevaciones laterales en máquina": "NkRQI9rrRN8", "Elevaciones laterales en polea": "SaoW-iSUxfk", "Elevación de piernas colgado": "98oNxE56i3g", "Extensión de rodilla con banda": "T3T4isfuN1g", "Extensión de tríceps con banda": "v3uVtjVASzs", "Extensión de tríceps sobre la cabeza en polea": "JJ3aW2IcE74", "Face pull en polea": "-iPCIEEl_X4", "Flexiones cerradas": "ge4u1V6RG1g", "Flexiones pica (pike push-ups)": "MnRzD9_D5JI", "Fondos de tríceps en banco": "oVs-HluNKP0", "Gemelos a una pierna con mancuerna": "OCpCLsrYfUU", "Gemelos de pie en máquina": "iOuAzeiDicY", "Gemelos en prensa": "_EkH6H7GNyY", "Gemelos sentado con mancuernas": "LjOv0sLPv04", "Hip thrust a una pierna": "RaKaj5gtk1A", "Hip thrust en Smith": "eZ23unp2N5Y", "Jalón con banda arrodillado": "JSa5F6nKOoA", "Patada de glúteo en polea": "_RovolXS2m8", "Peso muerto convencional": "0XL4cZR2Ink", "Peso muerto rumano a una pierna": "7ulHtv30lxM", "Peso muerto rumano con banda": "sN_PnKkeGPo", "Peso muerto rumano en Smith": "HAtTRiMN8G8", "Plancha Copenhague": "IOWKFZJ4zm8", "Plancha frontal": "1fcYUk49H2Y", "Press banca con barra": "DBYFzlkqxOc", "Press banca en Smith": "ReuWQou1ZcM", "Press de hombros con banda": "VZyPv405b6E", "Press de pecho con banda": "PTrOW--0y2k", "Press francés con barra Z": "emZ-3Cfnrn4", "Press inclinado con barra": "HboHdKXrYG8", "Press landmine": "R2ORnt_kLV0", "Press militar con mancuernas sentado": "UEzs_TIAOnk", "Press militar en Smith sentado": "FYhc3I06HIA", "Puente de glúteos": "UACIKae85Sk", "Pull-through en polea": "OmhY5_tVzt0", "Pullover en polea alta": "E7CiaycXvXU", "Pájaros con mancuernas": "RfyM979fKbI", "Pájaros en máquina (peck deck inverso)": "oQCsBFfYI2o", "Remo con banda": "3c8nMEkQSBc", "Remo invertido": "HL-3xiEmBkc", "Rueda abdominal": "cRy6GbL2QKY", "Sentadilla con barra": "qsAkuNORgmk", "Sentadilla en Smith": "rQw8GUzpj1I", "Sentadilla frontal": "KXhu0HkJ7K4", "Sentadilla goblet": "SpMrPG3RiCQ", "Sentadilla hack": "itmlCUc0P3k", "Sentadilla sissy": "Jvm_bhSYs8M", "Separación con banda (pull-apart)": "5OvpIHIaWDA"};
+// Índice plano
+const ALL = [];
+P.forEach(p => p.ex.forEach((e,i) => ALL.push({n:e[0], eq:e[1].split(","), v:e[2], s:e[3], st:e[4], tip:e[5], p, i, key:p.id+"|"+i})));
+const norm = s => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
+// Sinónimos para que encuentren lo que escriben en el gimnasio
+const ALIAS = {"press de pecho en maquina":"chest press","press banca con barra":"bench press","peso muerto rumano con barra":"rdl","peso muerto rumano con mancuernas":"rdl","dominadas":"pull ups pullups chin ups","jalon al pecho":"lat pulldown polea","sentadilla goblet":"golbet","zancadas con mancuernas":"estocadas lunges","step-up con barra":"subidas al banco","aperturas en maquina (peck deck)":"pec deck","flexiones de brazos":"push ups lagartijas","gemelos de pie en smith":"pantorrillas","gemelos sentado":"soleo pantorrillas","hip thrust con barra":"empuje de cadera","extension de cuadriceps":"sillon cuadriceps leg extension","curl femoral acostado":"leg curl isquios","prensa de piernas":"leg press 45","press militar con barra de pie":"press overhead","deltoides posterior en polea":"rear delt pajaros"};
+
+let state = {pick: ALL.find(x=>x.n==="Prensa de piernas"), reason:"busy", eq:new Set(Object.keys(EQ))};
+
+const $ = id => document.getElementById(id);
+const q=$("q"), sugg=$("sugg");
+
+function eqLabel(arr){return arr.map(k=>EQ[k]).join(" / ")}
+function renderPicked(){
+  const x=state.pick;
+  $("picked").innerHTML = x ? `<div><small>Reemplazando</small><b>${x.n}</b><small>${x.p.name} · ${x.p.mus}</small></div>` : `<div><small>Buscá un ejercicio para empezar.</small></div>`;
+}
+function renderReasons(){
+  $("reasons").innerHTML = REASONS.map(r=>`<button type="button" class="chip" aria-pressed="${state.reason===r.id}" data-r="${r.id}"><span class="dot"></span>${r.label}</button>`).join("");
+}
+function renderEquip(){
+  $("equip").innerHTML = Object.entries(EQ).map(([k,l])=>`<button type="button" class="chip" aria-pressed="${state.eq.has(k)}" data-e="${k}"><span class="dot"></span>${l}</button>`).join("");
+  $("eqcount").textContent = state.eq.size===7 ? "Todo" : `${state.eq.size} de 7`;
+}
+const play = `<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="8" fill="#EEB625"/><path d="M6.4 5v6l4.8-3z" fill="#141414"/></svg>`;
+
+function results(){
+  const x=state.pick; if(!x) return [];
+  let list = x.p.ex.map((e,i)=>ALL.find(a=>a.key===x.p.id+"|"+i)).filter(a=>a.key!==x.key);
+  // "No tengo el material": no sugerir el mismo implemento que falta
+  list = list.filter(a=>a.eq.some(k=>state.eq.has(k)));
+  if(state.reason==="busy"){ list = list.filter(a=>a.n!==x.n); }
+  if(state.reason==="noeq"){ const missing=x.eq; list = list.filter(a=>!a.eq.every(k=>missing.includes(k))); }
+  list.sort((a,b)=>{
+    const sa=(a.s===x.s?0:1), sb=(b.s===x.s?0:1);
+    if(state.reason==="pain"){ if(sa!==sb) return sa-sb; if(a.st!==b.st) return b.st-a.st; }
+    if(sa!==sb) return sa-sb;
+    return a.i-b.i;
+  });
+  return list;
+}
+
+function renderResults(){
+  const x=state.pick, list=results();
+  $("rtitle").textContent = x ? `En lugar de ${x.n.toLowerCase()}` : "Tus alternativas";
+  $("rcount").textContent = x ? `${list.length} opciones` : "";
+  let note="";
+  if(x && state.reason==="pain") note = `<div class="notice"><b>Primero las más estables.</b> Si un ejercicio genera dolor (no esfuerzo), probá una variante más guiada, con menos carga o menos recorrido. Si el dolor sigue, consultalo con un profesional.</div>`;
+  if(x && state.reason==="noeq") note = `<div class="notice">Saqué las opciones que usan solo <b>${eqLabel(x.eq).toLowerCase()}</b>. Marcá abajo lo que sí tenés.</div>`;
+  $("notice").innerHTML = note;
+  if(!x){ $("res").innerHTML = `<li class="empty">Buscá el ejercicio que no podés hacer y acá aparecen tus alternativas.</li>`; return; }
+  if(!list.length){ $("res").innerHTML = `<li class="empty">Con el material que marcaste no hay un reemplazo de este patrón. Probá marcar más opciones en el paso 3, o escribime y lo vemos.</li>`; return; }
+  $("res").innerHTML = list.map((a,k)=>{
+    const same = a.s===x.s;
+    const tag = k===0 ? `<span class="tag top">Mejor opción</span>` : "";
+    const rel = same ? `<span class="tag same">Misma función</span>` : `<span class="tag far">${x.p.subs[a.s]}: alternativa más lejana</span>`;
+    const ext = EXT[a.n];
+    const vid = a.v ? `<a class="vid" href="https://youtube.com/shorts/${a.v}" target="_blank" rel="noopener">${play}Ver video</a>`
+      : ext ? `<a class="vid ext" href="https://www.youtube.com/watch?v=${ext}" target="_blank" rel="noopener">${play}Ver video de referencia</a>`
+      : `<span class="novid">Sin video por ahora</span>`;
+    return `<li class="item${k===0?" best":""}"><span class="rank">${k+1}</span><h3>${a.n}</h3><div class="meta">${tag}${rel}<span class="tag">${eqLabel(a.eq)}</span></div><p>${a.tip}</p>${vid}</li>`;
+  }).join("");
+}
+
+function renderAll(){renderPicked();renderReasons();renderEquip();renderResults();}
+
+// Búsqueda
+let active=-1, matches=[];
+function search(){
+  const t=norm(q.value.trim());
+  if(!t){sugg.hidden=true;return;}
+  const seen=new Set();
+  matches = ALL.filter(a=>{ if(seen.has(a.n)) return false; const hay=norm(a.n+" "+(ALIAS[norm(a.n)]||"")+" "+a.p.name); const ok=t.split(/\s+/).every(w=>hay.includes(w)); if(ok) seen.add(a.n); return ok; }).slice(0,12);
+  active=-1;
+  sugg.innerHTML = matches.length ? matches.map((a,i)=>`<li><button type="button" role="option" id="o${i}" data-i="${i}" aria-selected="false"><span>${a.n}</span><small>${a.p.name}</small></button></li>`).join("") : `<li style="padding:10px;color:var(--muted);font-size:13px">No lo encuentro. Probá con otra palabra (ej.: "remo", "press", "curl").</li>`;
+  sugg.hidden=false;
+}
+function choose(a){ state.pick=a; q.value=""; sugg.hidden=true; renderPicked(); renderResults(); q.blur(); }
+q.addEventListener("input",search);
+q.addEventListener("focus",search);
+q.addEventListener("keydown",e=>{
+  if(sugg.hidden||!matches.length) return;
+  if(e.key==="ArrowDown"||e.key==="ArrowUp"){ e.preventDefault(); active=(active+(e.key==="ArrowDown"?1:-1)+matches.length)%matches.length; [...sugg.querySelectorAll("button")].forEach((b,i)=>b.setAttribute("aria-selected",i===active)); q.setAttribute("aria-activedescendant","o"+active); }
+  if(e.key==="Enter"){ e.preventDefault(); choose(matches[active<0?0:active]); }
+  if(e.key==="Escape"){ sugg.hidden=true; }
+});
+sugg.addEventListener("click",e=>{ const b=e.target.closest("button[data-i]"); if(b) choose(matches[+b.dataset.i]); });
+$("clear").addEventListener("click",()=>{q.value="";sugg.hidden=true;q.focus();});
+document.addEventListener("click",e=>{ if(!e.target.closest(".search")&&!e.target.closest("#sugg")) sugg.hidden=true; });
+$("reasons").addEventListener("click",e=>{ const b=e.target.closest("[data-r]"); if(!b) return; state.reason=b.dataset.r; renderReasons(); renderResults(); });
+$("equip").addEventListener("click",e=>{ const b=e.target.closest("[data-e]"); if(!b) return; const k=b.dataset.e; state.eq.has(k)?state.eq.delete(k):state.eq.add(k); renderEquip(); renderResults(); });
+$("allEq").addEventListener("click",()=>{ state.eq=new Set(Object.keys(EQ)); renderEquip(); renderResults(); });
+renderAll();
+</script>
+</body>
+</html>
